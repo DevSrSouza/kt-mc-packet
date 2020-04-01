@@ -1,4 +1,4 @@
-# kt-mc-packet
+# kt-mc-packet [WIP]
 
 A Minecraft packet library for Kotlin multiplatform that uses Kotlinx.serialization 
 to Encode and Decode Minecraft packets into objects.
@@ -9,7 +9,7 @@ Serialize:
 ```kotlin
 val minecraftVersion = 578 // 1.15.2
 
-val byteArray = MinecraftProtocol.dump(
+val byteArray: ByteArray = MinecraftProtocol.dump(
     HandshakePacket.Client.serializer(),
     HandshakePacket.Client(
         minecraftVersion,
@@ -22,7 +22,7 @@ val byteArray = MinecraftProtocol.dump(
 
 Deserialize:
 ```kotlin
-val handshake = MinecraftProtocol.load(
+val handshake: HandshakePacket.Client = MinecraftProtocol.load(
     HandshakePacket.Client.serializer(),
     byteArrayWithPacketData
 )
