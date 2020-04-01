@@ -1,0 +1,30 @@
+# Eclipse stuff
+.classpath
+.project
+.settings/
+
+# gradle
+.gradle/
+
+# vim
+.*.sw[a-p]
+
+# various other potential build files
+build/
+bin/
+dist/
+manifest.mf
+work/
+out/
+
+# Mac filesystem dust
+.DS_Store/
+
+# intellij
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Linux temp files
+*~
