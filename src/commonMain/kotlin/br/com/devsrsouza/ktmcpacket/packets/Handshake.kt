@@ -10,13 +10,13 @@ import kotlinx.serialization.Serializable
 object HandshakePacket {
     @Serializable
     @MinecraftEnum(VARINT)
-    enum class HandshakeState {
+    enum class HandshakeNextState {
         @SerialOrdinal(1) STATUS,
         @SerialOrdinal(2) LOGIN
     }
 
     @Serializable
-    data class Server(
+    data class Client(
         @MinecraftNumber(VAR)
         val version: Int,
 
@@ -25,7 +25,7 @@ object HandshakePacket {
         @MinecraftNumber(UNSIGNED)
         val port: Short,
 
-        val state: HandshakeState
+        val nextState: HandshakeNextState
     )
 }
 
