@@ -1,9 +1,10 @@
 plugins {
     kotlin("multiplatform") version "1.3.70"
     kotlin("plugin.serialization") version "1.3.70"
+    id("maven-publish")
 }
 
-group = "br.com.devsrsouza"
+group = "br.com.devsrsouza.kt-mc-packet"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -14,6 +15,8 @@ kotlin {
     /* Targets configuration omitted. 
     *  To find out how to configure the targets, please follow the link:
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
+
+    jvm()
 
     val serialization_version = "0.20.0"
     val kotlinx_io_version = "0.1.16"
