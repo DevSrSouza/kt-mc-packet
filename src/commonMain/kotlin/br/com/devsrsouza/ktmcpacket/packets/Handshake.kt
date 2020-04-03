@@ -1,7 +1,5 @@
 package br.com.devsrsouza.ktmcpacket.packets
 
-import br.com.devsrsouza.ktmcpacket.MinecraftEnum
-import br.com.devsrsouza.ktmcpacket.MinecraftEnumType.*
 import br.com.devsrsouza.ktmcpacket.MinecraftNumber
 import br.com.devsrsouza.ktmcpacket.MinecraftNumberType.*
 import br.com.devsrsouza.ktmcpacket.MinecraftString
@@ -10,7 +8,6 @@ import kotlinx.serialization.Serializable
 
 object HandshakePacket {
     @Serializable
-    @MinecraftEnum(VARINT)
     enum class HandshakeNextState {
         @SerialOrdinal(1) STATUS,
         @SerialOrdinal(2) LOGIN

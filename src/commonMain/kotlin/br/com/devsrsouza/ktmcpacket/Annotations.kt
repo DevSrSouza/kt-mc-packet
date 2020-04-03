@@ -12,18 +12,19 @@ annotation class MinecraftNumber(
         val type: MinecraftNumberType = MinecraftNumberType.DEFAULT
 )
 
+// Supports String properties and Enum String type
 @SerialInfo
-@Target(AnnotationTarget.PROPERTY)
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.CLASS)
 annotation class MinecraftString(
     val maxLength: Int
 )
 
 enum class MinecraftEnumType {
-    VARINT, BYTE
+    VARINT, BYTE, UNSIGNED_BYTE, INT, STRING
 }
 
 @SerialInfo
-@Target(AnnotationTarget.CLASS)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 annotation class MinecraftEnum(
     val type: MinecraftEnumType = MinecraftEnumType.VARINT
 )

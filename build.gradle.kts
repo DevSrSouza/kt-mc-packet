@@ -28,6 +28,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:$serialization_version")
                 implementation("io.ktor:ktor-io-native:1.3.2")
+                implementation("com.benasher44:uuid:0.1.0")
             }
         }
         val commonTest by getting {
@@ -36,5 +37,7 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
             }
         }
+
+        val jvmTest by getting {}
     }
 }

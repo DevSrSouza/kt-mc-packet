@@ -22,7 +22,9 @@ internal fun extractEnumParameters(
 ): ProtocolEnumDesc {
     val format = descriptor.findEntityAnnotation<MinecraftEnum>()?.type
         ?: MinecraftEnumType.VARINT
-    return ProtocolEnumDesc(format)
+    val stringMaxLength = descriptor.findEntityAnnotation<MinecraftString>()?.maxLength
+            ?: MINECRAFT_MAX_STRING_LENGTH
+    return ProtocolEnumDesc(format, stringMaxLength)
 }
 
 internal fun extractEnumElementParameters(

@@ -10,14 +10,13 @@ import kotlinx.serialization.*
 import kotlinx.serialization.CompositeDecoder.Companion.READ_DONE
 import kotlinx.serialization.internal.TaggedDecoder
 import kotlinx.serialization.internal.TaggedEncoder
-import kotlinx.serialization.modules.EmptyModule
 import kotlinx.serialization.modules.SerialModule
 
-class MinecraftProtocol(
-        override val context: SerialModule = EmptyModule
-) : BinaryFormat {
+class MinecraftProtocol : BinaryFormat {
 
     companion object Default : BinaryFormat by MinecraftProtocol()
+
+    override val context: SerialModule = MinecraftModule
 
     @InternalSerializationApi
     override fun <T> dump(
@@ -44,7 +43,7 @@ class MinecraftProtocol(
     }
 
     @InternalSerializationApi
-    internal inner class MinecraftProtocolEncoder(
+    private class MinecraftProtocolEncoder(
             val output: Output
     ) : TaggedEncoder<ProtocolDesc>() {
 
@@ -107,19 +106,23 @@ class MinecraftProtocol(
                 enumDescription: SerialDescriptor,
                 ordinal: Int
         ) {
-            val enumElementDesc = extractEnumElementParameters(
+            val enumTag = extractEnumElementParameters(
                 enumDescription,
                 ordinal
             )
             when (extractEnumParameters(enumDescription).type) {
-                MinecraftEnumType.VARINT -> output.minecraft.writeVarInt(enumElementDesc.ordinal)
-                MinecraftEnumType.BYTE -> output.writeByte(enumElementDesc.ordinal.toByte())
+                MinecraftEnumType.VARINT -> output.minecraft.writeVarInt(enumTag.ordinal)
+                MinecraftEnumType.BYTE -> output.writeByte(enumTag.ordinal.toByte())
+                MinecraftEnumType.UNSIGNED_BYTE -> output.writeUByte(enumTag.ordinal.toUByte())
+                MinecraftEnumType.INT -> output.writeInt(enumTag.ordinal)
+                MinecraftEnumType.STRING ->
+                    output.minecraft.writeString(enumDescription.getElementName(ordinal))
             }
         }
     }
 
     @InternalSerializationApi
-    private inner class MinecraftProtocolDecoder(
+    private class MinecraftProtocolDecoder(
         val input: Input
     ) : TaggedDecoder<ProtocolDesc>() {
         private var currentIndex = 0
@@ -175,14 +178,18 @@ class MinecraftProtocol(
             tag: ProtocolDesc
         ): String = input.minecraft.readString(MINECRAFT_MAX_STRING_LENGTH)
 
+        @ExperimentalStdlibApi
         override fun decodeTaggedEnum(
             tag: ProtocolDesc, enumDescription: SerialDescriptor
         ): Int {
-            val ordinal = when (extractEnumParameters(
-                enumDescription
-            ).type) {
+            val enumTag = extractEnumParameters(enumDescription)
+            val ordinal = when (enumTag.type) {
                 MinecraftEnumType.VARINT -> input.minecraft.readVarInt()
                 MinecraftEnumType.BYTE -> input.readByte().toInt()
+                MinecraftEnumType.UNSIGNED_BYTE -> input.readUByte().toByte().toInt()
+                MinecraftEnumType.INT -> input.readInt()
+                MinecraftEnumType.STRING ->
+                    enumDescription.getElementIndex(input.minecraft.readString(enumTag.stringMaxLength))
             }
 
             return findEnumIndexByTag(enumDescription, ordinal)
@@ -199,7 +206,8 @@ internal data class ProtocolDesc(
 )
 
 internal data class ProtocolEnumDesc(
-    val type: MinecraftEnumType
+    val type: MinecraftEnumType,
+    val stringMaxLength: Int
 )
 
 internal data class ProtocolEnumElementDesc(
