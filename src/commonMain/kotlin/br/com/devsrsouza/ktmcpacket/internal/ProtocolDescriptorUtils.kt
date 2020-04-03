@@ -12,7 +12,9 @@ internal fun extractParameters(
 ): ProtocolDesc {
     val format = descriptor.findElementAnnotation<MinecraftNumber>(index)?.type
         ?: MinecraftNumberType.DEFAULT
-    return ProtocolDesc(format)
+    val stringMaxLength = descriptor.findElementAnnotation<MinecraftString>(index)?.maxLength
+        ?: MINECRAFT_MAX_STRING_LENGTH
+    return ProtocolDesc(format, stringMaxLength)
 }
 
 internal fun extractEnumParameters(

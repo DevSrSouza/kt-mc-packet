@@ -4,6 +4,7 @@ import br.com.devsrsouza.ktmcpacket.MinecraftEnum
 import br.com.devsrsouza.ktmcpacket.MinecraftEnumType.*
 import br.com.devsrsouza.ktmcpacket.MinecraftNumber
 import br.com.devsrsouza.ktmcpacket.MinecraftNumberType.*
+import br.com.devsrsouza.ktmcpacket.MinecraftString
 import br.com.devsrsouza.ktmcpacket.SerialOrdinal
 import kotlinx.serialization.Serializable
 
@@ -20,6 +21,7 @@ object HandshakePacket {
         @MinecraftNumber(VAR)
         val version: Int,
 
+        @MinecraftString(255)
         val address: String,
 
         @MinecraftNumber(UNSIGNED)

@@ -12,6 +12,12 @@ annotation class MinecraftNumber(
         val type: MinecraftNumberType = MinecraftNumberType.DEFAULT
 )
 
+@SerialInfo
+@Target(AnnotationTarget.PROPERTY)
+annotation class MinecraftString(
+    val maxLength: Int
+)
+
 enum class MinecraftEnumType {
     VARINT, BYTE
 }

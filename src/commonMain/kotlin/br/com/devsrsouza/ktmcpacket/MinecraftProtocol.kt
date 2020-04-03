@@ -173,7 +173,7 @@ class MinecraftProtocol(
         @ExperimentalStdlibApi
         override fun decodeTaggedString(
             tag: ProtocolDesc
-        ): String = input.minecraft.readString(input.minecraft.readVarInt())
+        ): String = input.minecraft.readString(MINECRAFT_MAX_STRING_LENGTH)
 
         override fun decodeTaggedEnum(
             tag: ProtocolDesc, enumDescription: SerialDescriptor
@@ -194,7 +194,8 @@ class MinecraftProtocol(
 }
 
 internal data class ProtocolDesc(
-    val type: MinecraftNumberType
+    val type: MinecraftNumberType,
+    val stringMaxLength: Int
 )
 
 internal data class ProtocolEnumDesc(
