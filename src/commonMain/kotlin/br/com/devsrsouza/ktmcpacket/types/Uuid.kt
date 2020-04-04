@@ -11,8 +11,10 @@ object UUIDSerializer : KSerializer<Uuid> {
         PrimitiveDescriptor("UUID", PrimitiveKind.LONG)
 
     override fun serialize(encoder: Encoder, value: Uuid) {
-        encoder.encodeLong(value.mostSignificantBits)
-        encoder.encodeLong(value.leastSignificantBits)
+        encoder.encodeStructure(descriptor) {
+            encodeLongElement(descriptor, 0, value.mostSignificantBits)
+            encodeLongElement(descriptor, 1, value.leastSignificantBits)
+        }
     }
 
     override fun deserialize(decoder: Decoder): Uuid {

@@ -1,7 +1,7 @@
 # kt-mc-packet
 
-A Minecraft Java Edition packet library for Kotlin multiplatform that uses Kotlinx.serialization 
-to Encode and Decode Minecraft packets into objects.
+A Minecraft Java Edition Protocol library for Kotlin multiplatform that uses Kotlinx.serialization 
+to Encode and Decode Minecraft packets as kotlin data classes.
 
 ## Usage
 

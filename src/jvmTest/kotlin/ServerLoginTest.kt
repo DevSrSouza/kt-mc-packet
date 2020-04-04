@@ -104,22 +104,54 @@ suspend fun main() {
     output.writeVarInt(packet.size)
     output.write(packet.build().readBytes())
 
-    println("seding player position")
+    println("sending player position")
     response = MinecraftProtocol.dump(
             PlayerPositionAndLook.serializer(),
             PlayerPositionAndLook(
                     0.0,
                     64.0,
                     0.0,
-                    180f,
-                    180f,
-                    0x01,
+                    130f,
+                    25f,
+                    0x00,
                     1
             )
     )
 
     packet = BytePacketBuilder().apply {
         writeByte(0x36)
+        writeFully(response)
+    }
+    output.writeVarInt(packet.size)
+    output.write(packet.build().readBytes())
+
+    println("login complete!")
+
+    // others packets
+
+    delay(1000)
+
+    println("sending spawn living entity")
+    response = MinecraftProtocol.dump(
+        SpawnLivingEntity.serializer(),
+        SpawnLivingEntity(
+            3,
+            UUID.randomUUID(),
+            14,
+            -1.5,
+            64.0,
+            -1.5,
+            0u.toByte(),
+            0u.toByte(),
+            0u.toByte(),
+            0,
+            0,
+            0
+        )
+    )
+
+    packet = BytePacketBuilder().apply {
+        writeByte(0x03)
         writeFully(response)
     }
     output.writeVarInt(packet.size)

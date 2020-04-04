@@ -43,7 +43,7 @@ class MinecraftProtocol : BinaryFormat {
     }
 
     @InternalSerializationApi
-    private class MinecraftProtocolEncoder(
+    private open class MinecraftProtocolEncoder(
             val output: Output
     ) : TaggedEncoder<ProtocolDesc>() {
 
@@ -119,10 +119,31 @@ class MinecraftProtocol : BinaryFormat {
                     output.minecraft.writeString(enumDescription.getElementName(ordinal))
             }
         }
+
+        override fun beginStructure(
+            descriptor: SerialDescriptor,
+            vararg typeSerializers: KSerializer<*>
+        ): CompositeEncoder {
+            return when(descriptor.kind) {
+                is PrimitiveKind -> RepeatedMinecraftProtocolEncoder(
+                    output,
+                    ProtocolDesc(MinecraftNumberType.DEFAULT, MINECRAFT_MAX_STRING_LENGTH)
+                )
+                else -> super.beginStructure(descriptor, *typeSerializers)
+            }
+        }
     }
 
     @InternalSerializationApi
-    private class MinecraftProtocolDecoder(
+    private class RepeatedMinecraftProtocolEncoder(
+        output: Output,
+        val tag: ProtocolDesc
+    ) : MinecraftProtocolEncoder(output) {
+        override fun SerialDescriptor.getTag(index: Int) = tag
+    }
+
+    @InternalSerializationApi
+    private open class MinecraftProtocolDecoder(
         val input: Input
     ) : TaggedDecoder<ProtocolDesc>() {
         private var currentIndex = 0
@@ -197,6 +218,27 @@ class MinecraftProtocol : BinaryFormat {
 
         override fun SerialDescriptor.getTag(index: Int) =
             extractParameters(this, index)
+
+        override fun beginStructure(
+            descriptor: SerialDescriptor,
+            vararg typeParams: KSerializer<*>
+        ): CompositeDecoder {
+            return when(descriptor.kind) {
+                is PrimitiveKind -> RepeatedMinecraftProtocolDecoder(
+                    input,
+                    ProtocolDesc(MinecraftNumberType.DEFAULT, MINECRAFT_MAX_STRING_LENGTH)
+                )
+                else -> super.beginStructure(descriptor, *typeParams)
+            }
+        }
+    }
+
+    @InternalSerializationApi
+    private class RepeatedMinecraftProtocolDecoder(
+        input: Input,
+        val tag: ProtocolDesc
+    ) : MinecraftProtocolDecoder(input) {
+        override fun SerialDescriptor.getTag(index: Int) = tag
     }
 }
 
