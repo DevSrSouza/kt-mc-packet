@@ -1,27 +1,28 @@
 import br.com.devsrsouza.ktmcpacket.MinecraftProtocol
-import br.com.devsrsouza.ktmcpacket.packets.HandshakePacket
+import br.com.devsrsouza.ktmcpacket.packets.client.Handshake
+import br.com.devsrsouza.ktmcpacket.packets.client.HandshakeNextState
 
 fun main() {
     val minecraftVersion = 578 // 1.15.2
 
-    val packet = HandshakePacket.Client(
+    val packet = Handshake(
         minecraftVersion,
         "minecraftserver.com",
         25565,
-        HandshakePacket.HandshakeNextState.STATUS
+        HandshakeNextState.STATUS
     )
 
     println(packet)
 
     val byteArray = MinecraftProtocol.dump(
-        HandshakePacket.Client.serializer(),
+        Handshake.serializer(),
         packet
     )
 
     println(byteArray.toHex())
 
     val handshake = MinecraftProtocol.load(
-        HandshakePacket.Client.serializer(),
+        Handshake.serializer(),
         byteArray
     )
 

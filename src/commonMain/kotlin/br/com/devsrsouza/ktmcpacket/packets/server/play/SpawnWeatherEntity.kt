@@ -1,4 +1,4 @@
-package br.com.devsrsouza.ktmcpacket.packets.play
+package br.com.devsrsouza.ktmcpacket.packets.server.play
 
 import br.com.devsrsouza.ktmcpacket.MinecraftEnum
 import br.com.devsrsouza.ktmcpacket.MinecraftEnumType.BYTE
@@ -7,16 +7,14 @@ import br.com.devsrsouza.ktmcpacket.MinecraftNumberType
 import br.com.devsrsouza.ktmcpacket.SerialOrdinal
 import kotlinx.serialization.Serializable
 
-object SpawnWeatherEntityPacket {
+@Serializable
+@MinecraftEnum(BYTE)
+enum class WeatherEntityType {
+    @SerialOrdinal(1) THUNDERBOLT
+}
 
-    @Serializable
-    @MinecraftEnum(BYTE)
-    enum class WeatherEntityType {
-        @SerialOrdinal(1) THUNDERBOLT
-    }
-
-    @Serializable
-    data class Server(
+@Serializable
+data class SpawnWeatherEntity(
         @MinecraftNumber(MinecraftNumberType.VAR)
         val entityId: Int,
 
@@ -25,5 +23,4 @@ object SpawnWeatherEntityPacket {
         val x: Double,
         val y: Double,
         val z: Double
-    )
-}
+)

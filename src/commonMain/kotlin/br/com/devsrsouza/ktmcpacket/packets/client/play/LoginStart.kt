@@ -1,13 +1,11 @@
-package br.com.devsrsouza.ktmcpacket.packets.login
+package br.com.devsrsouza.ktmcpacket.packets.client.play
 
 import br.com.devsrsouza.ktmcpacket.MinecraftString
 import kotlinx.serialization.Serializable
 
-object LoginStartPacket {
-    // 0x00
-    @Serializable
-    data class Client(
+// 0x00
+@Serializable
+data class LoginStart(
         @MinecraftString(16)
         val nickname: String
-    )
-}
+)

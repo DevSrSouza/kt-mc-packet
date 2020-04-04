@@ -1,7 +1,8 @@
 import br.com.devsrsouza.ktmcpacket.MinecraftProtocol
-import br.com.devsrsouza.ktmcpacket.packets.HandshakePacket
-import br.com.devsrsouza.ktmcpacket.packets.status.PingPongPacket
-import br.com.devsrsouza.ktmcpacket.packets.status.ServerListPingPacket
+import br.com.devsrsouza.ktmcpacket.packets.client.Handshake
+import br.com.devsrsouza.ktmcpacket.packets.client.status.Ping
+import br.com.devsrsouza.ktmcpacket.packets.server.status.Pong
+import br.com.devsrsouza.ktmcpacket.packets.server.status.ServerListPing
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.readFully
@@ -40,7 +41,7 @@ suspend fun main() {
     input.readFully(packetByteArray)
 
     val handshake = MinecraftProtocol.load(
-            HandshakePacket.Client.serializer(),
+            Handshake.serializer(),
             packetByteArray
     )
     println(handshake)
@@ -56,8 +57,8 @@ suspend fun main() {
     println("sending response")
 
     var response = MinecraftProtocol.dump(
-            ServerListPingPacket.Server.serializer(),
-            ServerListPingPacket.Server(STATUS_RESPONSE)
+            ServerListPing.serializer(),
+            ServerListPing(STATUS_RESPONSE)
     )
 
     output.writeVarInt(response.size+1)
@@ -77,7 +78,7 @@ suspend fun main() {
     input.readFully(packetByteArray)
 
     val ping = MinecraftProtocol.load(
-        PingPongPacket.Client.serializer(),
+        Ping.serializer(),
         packetByteArray
     )
 
@@ -86,8 +87,8 @@ suspend fun main() {
     println("sending pong back")
 
     response = MinecraftProtocol.dump(
-        PingPongPacket.Server.serializer(),
-        PingPongPacket.Server(ping.payload)
+        Pong.serializer(),
+        Pong(ping.payload)
     )
 
     output.writeVarInt(response.size+1)

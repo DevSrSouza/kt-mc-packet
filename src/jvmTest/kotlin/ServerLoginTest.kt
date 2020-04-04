@@ -1,13 +1,8 @@
 import br.com.devsrsouza.ktmcpacket.MinecraftProtocol
-import br.com.devsrsouza.ktmcpacket.packets.HandshakePacket
-import br.com.devsrsouza.ktmcpacket.packets.login.LoginStartPacket
-import br.com.devsrsouza.ktmcpacket.packets.login.LoginSuccessPacket
-import br.com.devsrsouza.ktmcpacket.packets.play.JoinGamePacket
-import br.com.devsrsouza.ktmcpacket.packets.play.PlayerPositionAndLookPacket
-import br.com.devsrsouza.ktmcpacket.packets.status.PingPongPacket
-import br.com.devsrsouza.ktmcpacket.packets.status.ServerListPingPacket
-import com.benasher44.uuid.Uuid
-import io.ktor.utils.io.ByteReadChannel
+import br.com.devsrsouza.ktmcpacket.packets.client.Handshake
+import br.com.devsrsouza.ktmcpacket.packets.client.play.LoginStart
+import br.com.devsrsouza.ktmcpacket.packets.server.login.LoginSuccess
+import br.com.devsrsouza.ktmcpacket.packets.server.play.*
 import io.ktor.utils.io.core.BytePacketBuilder
 import io.ktor.utils.io.core.Output
 import io.ktor.utils.io.core.readBytes
@@ -15,13 +10,9 @@ import io.ktor.utils.io.core.writeFully
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.readFully
 import kotlinx.coroutines.delay
-import kotlinx.serialization.InternalSerializationApi
-import org.intellij.lang.annotations.Language
 import java.io.DataOutputStream
-import java.io.OutputStream
 import java.net.ServerSocket
 import java.util.*
-import kotlin.experimental.and
 import kotlin.experimental.or
 
 /**
@@ -52,7 +43,7 @@ suspend fun main() {
     input.readFully(packetByteArray)
 
     val handshake = MinecraftProtocol.load(
-            HandshakePacket.Client.serializer(),
+            Handshake.serializer(),
             packetByteArray
     )
     println(handshake)
@@ -69,7 +60,7 @@ suspend fun main() {
     input.readFully(packetByteArray)
 
     val loginStart = MinecraftProtocol.load(
-            LoginStartPacket.Client.serializer(),
+            LoginStart.serializer(),
             packetByteArray
     )
 
@@ -78,8 +69,8 @@ suspend fun main() {
     println("sending Login success")
 
     var response = MinecraftProtocol.dump(
-            LoginSuccessPacket.Server.serializer(),
-            LoginSuccessPacket.Server(UUID.randomUUID(), loginStart.nickname)
+            LoginSuccess.serializer(),
+            LoginSuccess(UUID.randomUUID(), loginStart.nickname)
     )
 
     var packet = BytePacketBuilder().apply {
@@ -92,14 +83,14 @@ suspend fun main() {
 
     println("seding join game")
     response = MinecraftProtocol.dump(
-            JoinGamePacket.Server.serializer(),
-            JoinGamePacket.Server(
+            JoinGame.serializer(),
+            JoinGame(
                     1,
-                    JoinGamePacket.GameMode.ADVENTURE,
-                    JoinGamePacket.Dimension.OVERWORLD,
+                    GameMode.ADVENTURE,
+                    Dimension.OVERWORLD,
                     0.toLong(),
                     10,
-                    JoinGamePacket.LevelType.DEFAULT,
+                    LevelType.DEFAULT,
                     32,
                     false,
                     false
@@ -115,8 +106,8 @@ suspend fun main() {
 
     println("seding player position")
     response = MinecraftProtocol.dump(
-            PlayerPositionAndLookPacket.Server.serializer(),
-            PlayerPositionAndLookPacket.Server(
+            PlayerPositionAndLook.serializer(),
+            PlayerPositionAndLook(
                     0.0,
                     64.0,
                     0.0,

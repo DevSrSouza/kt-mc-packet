@@ -1,13 +1,11 @@
-package br.com.devsrsouza.ktmcpacket.packets.play
+package br.com.devsrsouza.ktmcpacket.packets.server.play
 
 import br.com.devsrsouza.ktmcpacket.MinecraftNumber
 import br.com.devsrsouza.ktmcpacket.MinecraftNumberType.*
 import kotlinx.serialization.Serializable
 
-object SpawnExperienceOrbPacket {
-
-    @Serializable
-    data class Server(
+@Serializable
+data class SpawnExperienceOrb(
         @MinecraftNumber(VAR)
         val entityId: Int,
 
@@ -16,5 +14,4 @@ object SpawnExperienceOrbPacket {
         val z: Double,
 
         val count: Short // The amount of experience this orb will reward once collected
-    )
-}
+)
