@@ -2,8 +2,8 @@ package br.com.devsrsouza.ktmcpacket.types
 
 import kotlinx.serialization.*
 
-fun Double.toPositionInt(): Int = (this * 32.0).toInt()
-fun Int.toPositionDouble(): Double = this / 32.0
+internal fun Double.toPositionInt(): Int = (this * 32.0).toInt()
+internal fun Int.toPositionDouble(): Double = this / 32.0
 
 /**
  * @see https://wiki.vg/Protocol#Position

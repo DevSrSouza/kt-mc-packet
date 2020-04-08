@@ -10,13 +10,15 @@ import kotlinx.serialization.*
 import kotlinx.serialization.CompositeDecoder.Companion.READ_DONE
 import kotlinx.serialization.internal.TaggedDecoder
 import kotlinx.serialization.internal.TaggedEncoder
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.modules.EmptyModule
 import kotlinx.serialization.modules.SerialModule
 
-class MinecraftProtocol : BinaryFormat {
+class MinecraftProtocol(
+    override val context: SerialModule = EmptyModule
+) : BinaryFormat {
 
     companion object Default : BinaryFormat by MinecraftProtocol()
-
-    override val context: SerialModule = MinecraftModule
 
     @InternalSerializationApi
     override fun <T> dump(
