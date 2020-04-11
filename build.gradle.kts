@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "br.com.devsrsouza.kt-mc-packet"
-version = "1.0-SNAPSHOT"
+version = "0.1.0"
 
 repositories {
     jcenter()
@@ -17,6 +17,7 @@ kotlin {
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
 
     jvm()
+    js()
 
     val serialization_version = "0.20.0"
     val kotlinx_io_version = "0.1.16"
@@ -25,7 +26,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-native:$serialization_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:$serialization_version")
                 implementation("io.ktor:ktor-io-native:1.3.2")
                 implementation("com.benasher44:uuid:0.1.0")
