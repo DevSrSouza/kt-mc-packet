@@ -4,7 +4,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "br.com.devsrsouza.kt-mc-packet"
+group = "br.com.devsrsouza"
 version = "0.1.0"
 
 repositories {
