@@ -2,8 +2,10 @@ package br.com.devsrsouza.ktmcpacket.packets.server.play
 
 import br.com.devsrsouza.ktmcpacket.*
 import br.com.devsrsouza.ktmcpacket.MinecraftNumberType.VAR
+import br.com.devsrsouza.ktmcpacket.packets.ServerPacket
 import kotlinx.serialization.*
 
+// 0x26
 @Serializable
 data class JoinGame(
     val entityId: Int,
@@ -15,7 +17,7 @@ data class JoinGame(
     @MinecraftNumber(VAR) val viewDistance: Int,
     val reducedDebugInfo: Boolean,
     val enableRespawnScreen: Boolean
-)
+) : ServerPacket
 
 @Serializable
 @MinecraftEnum(MinecraftEnumType.UNSIGNED_BYTE)

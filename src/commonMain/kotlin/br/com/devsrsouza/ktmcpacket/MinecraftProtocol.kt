@@ -25,11 +25,21 @@ class MinecraftProtocol(
             value: T
     ): ByteArray {
         val packetBuilder = BytePacketBuilder()
-        val encoder = MinecraftProtocolEncoder(packetBuilder)
 
-        encoder.encode(serializer, value)
+        dump(packetBuilder, serializer, value)
 
         return packetBuilder.build().readBytes()
+    }
+
+    @InternalSerializationApi
+    fun <T> dump(
+        output: Output,
+        serializer: SerializationStrategy<T>,
+        value: T
+    ) {
+        val encoder = MinecraftProtocolEncoder(output)
+
+        encoder.encode(serializer, value)
     }
 
     @InternalSerializationApi
@@ -39,7 +49,15 @@ class MinecraftProtocol(
     ): T {
         val packetRead = ByteReadPacket(bytes)
 
-        val decoder = MinecraftProtocolDecoder(packetRead)
+        return load(deserializer, packetRead)
+    }
+
+    @InternalSerializationApi
+    fun <T> load(
+        deserializer: DeserializationStrategy<T>,
+        input: Input
+    ): T {
+        val decoder = MinecraftProtocolDecoder(input)
         return decoder.decode(deserializer)
     }
 

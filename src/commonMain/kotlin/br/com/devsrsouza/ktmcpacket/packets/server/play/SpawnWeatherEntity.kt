@@ -5,6 +5,7 @@ import br.com.devsrsouza.ktmcpacket.MinecraftEnumType.BYTE
 import br.com.devsrsouza.ktmcpacket.MinecraftNumber
 import br.com.devsrsouza.ktmcpacket.MinecraftNumberType
 import br.com.devsrsouza.ktmcpacket.SerialOrdinal
+import br.com.devsrsouza.ktmcpacket.packets.ServerPacket
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -23,4 +24,4 @@ data class SpawnWeatherEntity(
         val x: Double,
         val y: Double,
         val z: Double
-)
+) : ServerPacket

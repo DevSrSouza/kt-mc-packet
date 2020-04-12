@@ -4,6 +4,7 @@ import br.com.devsrsouza.ktmcpacket.MinecraftNumber
 import br.com.devsrsouza.ktmcpacket.MinecraftNumberType
 import br.com.devsrsouza.ktmcpacket.MinecraftString
 import br.com.devsrsouza.ktmcpacket.SerialOrdinal
+import br.com.devsrsouza.ktmcpacket.packets.ClientPacket
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -24,4 +25,4 @@ data class Handshake(
     val port: Short,
 
     val nextState: HandshakeNextState
-)
+) : ClientPacket

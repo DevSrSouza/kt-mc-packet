@@ -2,10 +2,12 @@ package br.com.devsrsouza.ktmcpacket.packets.server.play
 
 import br.com.devsrsouza.ktmcpacket.MinecraftNumber
 import br.com.devsrsouza.ktmcpacket.MinecraftNumberType
+import br.com.devsrsouza.ktmcpacket.packets.ServerPacket
 import br.com.devsrsouza.ktmcpacket.types.UUIDSerializer
 import com.benasher44.uuid.Uuid
 import kotlinx.serialization.Serializable
 
+// 0x05
 @Serializable
 data class SpawnPlayer(
     @MinecraftNumber(MinecraftNumberType.VAR)
@@ -23,4 +25,4 @@ data class SpawnPlayer(
 
     @MinecraftNumber(MinecraftNumberType.UNSIGNED)
     val pitch: Byte // Angle: Unsigned Byte 1-256
-)
+) : ServerPacket

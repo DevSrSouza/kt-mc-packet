@@ -2,6 +2,7 @@ package br.com.devsrsouza.ktmcpacket.packets.server.play
 
 import br.com.devsrsouza.ktmcpacket.MinecraftNumber
 import br.com.devsrsouza.ktmcpacket.MinecraftNumberType
+import br.com.devsrsouza.ktmcpacket.packets.ServerPacket
 import br.com.devsrsouza.ktmcpacket.types.UUIDSerializer
 import com.benasher44.uuid.Uuid
 import kotlinx.serialization.Serializable
@@ -33,4 +34,4 @@ data class SpawnLivingEntity(
     val velocityX: Short,
     val velocityY: Short,
     val velocityZ: Short
-)
+) : ServerPacket
