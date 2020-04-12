@@ -12,74 +12,61 @@ import br.com.devsrsouza.ktmcpacket.packets.server.play.*
 import br.com.devsrsouza.ktmcpacket.packets.server.status.Pong
 import br.com.devsrsouza.ktmcpacket.packets.server.status.ServerListPing
 import kotlinx.serialization.KSerializer
+import kotlin.reflect.KClass
 
 typealias PacketId = Int
 
 enum class Packets(
-    val client: Map<PacketId, KSerializer<out ClientPacket>>,
-    val server: Map<PacketId, KSerializer<out ServerPacket>>
+    val client: List<PacketType<out ClientPacket>>,
+    val server: List<PacketType<out ServerPacket>>
 ) {
     STATUS(
-        client = mapOf(
-            0x00 to Request.serializer(),
-            0x01 to Ping.serializer()
+        client = listOf(
+            PacketType(0x00, Request::class, Request.serializer()),
+            PacketType(0x01, Ping::class, Ping.serializer())
         ),
-        server = mapOf(
-            0x00 to ServerListPing.serializer(),
-            0x01 to Pong.serializer()
+        server = listOf(
+            PacketType(0x00, ServerListPing::class, ServerListPing.serializer()),
+            PacketType(0x01, Pong::class, Pong.serializer())
         )
     ),
     LOGIN(
-        client = mapOf(
-            0x00 to LoginStart.serializer()
+        client = listOf(
+            PacketType(0x00, LoginStart::class, LoginStart.serializer())
         ),
-        server = mapOf(
-            0x02 to LoginSuccess.serializer()
+        server = listOf(
+            PacketType(0x02, LoginSuccess::class, LoginSuccess.serializer())
         )
     ),
     PLAY(
-        client = mapOf(),
-        server = mapOf(
-            0x00 to SpawnEntity.serializer(),
-            0x01 to SpawnExperienceOrb.serializer(),
-            0x02 to SpawnWeatherEntity.serializer(),
-            0x03 to SpawnLivingEntity.serializer(),
-            0x05 to SpawnPlayer.serializer(),
-            0x06 to EntityAnimation.serializer(),
-            0x08 to AcknowledgePlayerDigging.serializer(),
-            0x09 to BlockBreakAnimation.serializer(),
-            0x26 to JoinGame.serializer(),
-            0x36 to PlayerPositionAndLook.serializer()
+        client = listOf(),
+        server = listOf(
+            PacketType(0x00, SpawnEntity::class, SpawnEntity.serializer()),
+            PacketType(0x01, SpawnExperienceOrb::class, SpawnExperienceOrb.serializer()),
+            PacketType(0x02, SpawnWeatherEntity::class, SpawnWeatherEntity.serializer()),
+            PacketType(0x03, SpawnLivingEntity::class, SpawnLivingEntity.serializer()),
+            PacketType(0x05, SpawnPlayer::class, SpawnPlayer.serializer()),
+            PacketType(0x06, EntityAnimation::class, EntityAnimation.serializer()),
+            PacketType(0x08, AcknowledgePlayerDigging::class, AcknowledgePlayerDigging.serializer()),
+            PacketType(0x09, BlockBreakAnimation::class, BlockBreakAnimation.serializer()),
+            PacketType(0x26, JoinGame::class, JoinGame.serializer()),
+            PacketType(0x36, PlayerPositionAndLook::class, PlayerPositionAndLook.serializer())
         )
     );
+
+    val byKClass: Map<KClass<out Packet>, PacketType<out Packet>>
+            = client.associateBy { it.kclass } + server.associateBy { it.kclass }
+
+    val clientById: Map<PacketId, PacketType<out ClientPacket>> = client.associateBy { it.id }
+    val serverById: Map<PacketId, PacketType<out ServerPacket>> = server.associateBy { it.id }
 
     companion object {
         val HANDSHAKE = Handshake.serializer()
     }
 }
 
-fun <T : ServerPacket> Packets.findServerPacketById(
-    id: PacketId
-): KSerializer<T>? = server[id] as KSerializer<T>?
-
-fun <T : ClientPacket> Packets.findClientPacketById(
-    id: PacketId
-): KSerializer<T>? = client[id] as KSerializer<T>?
-
-fun Packets.findIdByPacket(
-    serializer: KSerializer<Packet>
-): Int? = findIdByServerPacket(serializer) ?: findIdByClientPacket(serializer)
-
-fun Packets.findIdByServerPacket(
-    serializer: KSerializer<Packet>
-): Int? = server.findId(serializer)
-
-fun Packets.findIdByClientPacket(
-    serializer: KSerializer<Packet>
-): Int? = client.findId(serializer)
-
-private fun Map<Int, KSerializer<out Packet>>.findId(
-    serializer: KSerializer<Packet>
-): Int? = entries.find {
-    it.value.descriptor.serialName == serializer.descriptor.serialName
-}?.key
+data class PacketType<T : Packet>(
+    val id: PacketId,
+    val kclass: KClass<T>,
+    val serializer: KSerializer<T>
+)
