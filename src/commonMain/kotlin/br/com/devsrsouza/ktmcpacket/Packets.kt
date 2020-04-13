@@ -20,6 +20,12 @@ enum class Packets(
     val client: List<PacketType<out ClientPacket>>,
     val server: List<PacketType<out ServerPacket>>
 ) {
+    HANDSHAKE(
+        client = listOf(
+            PacketType(0x00, Handshake::class, Handshake.serializer())
+        ),
+        server = emptyList()
+    ),
     STATUS(
         client = listOf(
             PacketType(0x00, Request::class, Request.serializer()),
@@ -59,10 +65,6 @@ enum class Packets(
 
     val clientById: Map<PacketId, PacketType<out ClientPacket>> = client.associateBy { it.id }
     val serverById: Map<PacketId, PacketType<out ServerPacket>> = server.associateBy { it.id }
-
-    companion object {
-        val HANDSHAKE = Handshake.serializer()
-    }
 }
 
 data class PacketType<T : Packet>(
