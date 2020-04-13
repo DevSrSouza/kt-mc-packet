@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 
 typealias PacketId = Int
 
-enum class Packets(
+enum class PacketState(
     val client: List<PacketType<out ClientPacket>>,
     val server: List<PacketType<out ServerPacket>>
 ) {

@@ -1,11 +1,15 @@
 import br.com.devsrsouza.ktmcpacket.MinecraftProtocol
+import br.com.devsrsouza.ktmcpacket.internal.minecraft
 import br.com.devsrsouza.ktmcpacket.packets.client.Handshake
 import br.com.devsrsouza.ktmcpacket.packets.client.status.Ping
 import br.com.devsrsouza.ktmcpacket.packets.server.status.Pong
 import br.com.devsrsouza.ktmcpacket.packets.server.status.ServerListPing
 import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.core.BytePacketBuilder
+import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.readFully
+import kotlinx.serialization.InternalSerializationApi
 import org.intellij.lang.annotations.Language
 import java.io.DataOutputStream
 import java.io.OutputStream
@@ -17,6 +21,7 @@ import kotlin.experimental.or
  * This is a mini server socket as a Minecraft Server
  * that works only with Status request.
  */
+@InternalSerializationApi
 suspend fun main() {
     val serverSocket = ServerSocket(25565)
 
@@ -26,6 +31,8 @@ suspend fun main() {
     val input = socket.getInputStream().toByteReadChannel()
     val output = DataOutputStream(socket.getOutputStream())
 
+    val MinecraftProtocol = MinecraftProtocol()
+
     println("Received a connection.")
 
     // handshake
@@ -33,16 +40,14 @@ suspend fun main() {
     var packetLength = input.readVarInt()
     println("packetLength: $packetLength")
 
-    var packetId = input.readVarInt()
-    println("packetId: $packetId")
+    var packetData = input.readPacket(packetLength, 0)
 
-    // -1 because the packetId was read
-    var packetByteArray = ByteArray(packetLength - 1)
-    input.readFully(packetByteArray)
+    var packetId = packetData.minecraft.readVarInt()
+    println("packetId: $packetId")
 
     val handshake = MinecraftProtocol.load(
             Handshake.serializer(),
-            packetByteArray
+            packetData
     )
     println(handshake)
 
@@ -56,45 +61,49 @@ suspend fun main() {
 
     println("sending response")
 
-    var response = MinecraftProtocol.dump(
-            ServerListPing.serializer(),
-            ServerListPing(STATUS_RESPONSE)
+    var response = BytePacketBuilder()
+    response.writeVarInt(0x00)
+
+    MinecraftProtocol.dump(
+        response,
+        ServerListPing.serializer(),
+        ServerListPing(STATUS_RESPONSE)
     )
 
-    output.writeVarInt(response.size+1)
-    output.writeByte(0x00)
+    output.writeVarInt(response.size)
 
-    output.write(response)
+    output.write(response.build().readBytes())
 
     println("ping start")
     packetLength = input.readVarInt()
     println("packetLength: $packetLength")
 
-    packetId = input.readVarInt()
-    println("packetId: $packetId")
+    packetData = input.readPacket(packetLength, 0)
 
-    // -1 because the packetId was read
-    packetByteArray = ByteArray(packetLength - 1)
-    input.readFully(packetByteArray)
+    packetId = packetData.minecraft.readVarInt()
+    println("packetId: $packetId")
 
     val ping = MinecraftProtocol.load(
         Ping.serializer(),
-        packetByteArray
+        packetData
     )
 
     println(ping)
 
     println("sending pong back")
 
-    response = MinecraftProtocol.dump(
+    response = BytePacketBuilder()
+    response.writeVarInt(0x01)
+
+    MinecraftProtocol.dump(
+        response,
         Pong.serializer(),
         Pong(ping.payload)
     )
 
-    output.writeVarInt(response.size+1)
-    output.writeByte(0x01)
+    output.writeVarInt(response.size)
 
-    output.write(response)
+    output.write(response.build().readBytes())
 }
 
 @Language("JSON")
