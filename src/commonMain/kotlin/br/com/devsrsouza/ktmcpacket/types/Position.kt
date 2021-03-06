@@ -1,6 +1,11 @@
 package br.com.devsrsouza.ktmcpacket.types
 
 import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 internal fun Double.toPositionInt(): Int = (this * 32.0).toInt()
 internal fun Int.toPositionDouble(): Double = this / 32.0
@@ -27,7 +32,7 @@ data class Position(
     @Serializer(forClass = Position::class)
     companion object : KSerializer<Position> {
         override val descriptor: SerialDescriptor
-                = PrimitiveDescriptor("Position", PrimitiveKind.LONG)
+                = PrimitiveSerialDescriptor("Position", PrimitiveKind.LONG)
 
         override fun deserialize(decoder: Decoder): Position {
             val serialized = decoder.decodeLong()

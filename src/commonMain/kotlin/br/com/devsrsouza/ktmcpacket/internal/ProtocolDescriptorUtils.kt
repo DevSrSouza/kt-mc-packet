@@ -1,10 +1,10 @@
 package br.com.devsrsouza.ktmcpacket.internal
 
-import br.com.devsrsouza.ktmcpacket.*
+import  br.com.devsrsouza.ktmcpacket.*
 import br.com.devsrsouza.ktmcpacket.ProtocolDesc
 import br.com.devsrsouza.ktmcpacket.ProtocolEnumDesc
 import br.com.devsrsouza.ktmcpacket.ProtocolEnumElementDesc
-import kotlinx.serialization.SerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
 
 internal fun extractParameters(
     descriptor: SerialDescriptor,

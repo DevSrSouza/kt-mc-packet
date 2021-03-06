@@ -45,7 +45,7 @@ suspend fun main() {
     var packetId = packetData.minecraft.readVarInt()
     println("packetId: $packetId")
 
-    val handshake = MinecraftProtocol.load(
+    val handshake = MinecraftProtocol.decodeFromByteArray(
             Handshake.serializer(),
             packetData
     )
@@ -64,7 +64,7 @@ suspend fun main() {
     var response = BytePacketBuilder()
     response.writeVarInt(0x00)
 
-    MinecraftProtocol.dump(
+    MinecraftProtocol.encodeToByteArray(
         response,
         ServerListPing.serializer(),
         ServerListPing(STATUS_RESPONSE)
@@ -83,7 +83,7 @@ suspend fun main() {
     packetId = packetData.minecraft.readVarInt()
     println("packetId: $packetId")
 
-    val ping = MinecraftProtocol.load(
+    val ping = MinecraftProtocol.decodeFromByteArray(
         Ping.serializer(),
         packetData
     )
@@ -95,7 +95,7 @@ suspend fun main() {
     response = BytePacketBuilder()
     response.writeVarInt(0x01)
 
-    MinecraftProtocol.dump(
+    MinecraftProtocol.encodeToByteArray(
         response,
         Pong.serializer(),
         Pong(ping.payload)

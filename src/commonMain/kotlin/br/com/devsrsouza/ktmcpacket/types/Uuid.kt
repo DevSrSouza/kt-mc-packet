@@ -3,12 +3,18 @@ package br.com.devsrsouza.ktmcpacket.types
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.encodeStructure
 
 @Serializer(forClass = Uuid::class)
 object UUIDSerializer : KSerializer<Uuid> {
 
     override val descriptor: SerialDescriptor =
-        PrimitiveDescriptor("UUID", PrimitiveKind.LONG)
+        PrimitiveSerialDescriptor("UUID", PrimitiveKind.LONG)
 
     override fun serialize(encoder: Encoder, value: Uuid) {
         encoder.encodeStructure(descriptor) {
@@ -28,7 +34,7 @@ object UUIDSerializer : KSerializer<Uuid> {
 @Serializer(forClass = Uuid::class)
 object UUIDStringSerializer : KSerializer<Uuid> {
     override val descriptor: SerialDescriptor =
-        PrimitiveDescriptor("UUID", PrimitiveKind.STRING)
+        PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Uuid) {
         encoder.encodeString(value.toString())

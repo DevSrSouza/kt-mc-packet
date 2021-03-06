@@ -5,7 +5,6 @@ import br.com.devsrsouza.ktmcpacket.MinecraftNumberType
 import br.com.devsrsouza.ktmcpacket.packets.ServerPacket
 import br.com.devsrsouza.ktmcpacket.types.UUIDSerializer
 import com.benasher44.uuid.Uuid
-import kotlinx.serialization.ContextualSerialization
 import kotlinx.serialization.Serializable
 
 @Serializable

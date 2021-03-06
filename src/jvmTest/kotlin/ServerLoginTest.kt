@@ -42,7 +42,7 @@ suspend fun main() {
     var packetByteArray = ByteArray(packetLength - 1)
     input.readFully(packetByteArray)
 
-    val handshake = MinecraftProtocol.load(
+    val handshake = MinecraftProtocol.decodeFromByteArray(
             Handshake.serializer(),
             packetByteArray
     )
@@ -59,7 +59,7 @@ suspend fun main() {
     packetByteArray = ByteArray(packetLength - 1)
     input.readFully(packetByteArray)
 
-    val loginStart = MinecraftProtocol.load(
+    val loginStart = MinecraftProtocol.decodeFromByteArray(
             LoginStart.serializer(),
             packetByteArray
     )
@@ -68,7 +68,7 @@ suspend fun main() {
 
     println("sending Login success")
 
-    var response = MinecraftProtocol.dump(
+    var response = MinecraftProtocol.encodeToByteArray(
             LoginSuccess.serializer(),
             LoginSuccess(UUID.randomUUID(), loginStart.nickname)
     )
@@ -82,7 +82,7 @@ suspend fun main() {
     output.write(packet.build().readBytes())
 
     println("seding join game")
-    response = MinecraftProtocol.dump(
+    response = MinecraftProtocol.encodeToByteArray(
             JoinGame.serializer(),
             JoinGame(
                     1,
@@ -105,7 +105,7 @@ suspend fun main() {
     output.write(packet.build().readBytes())
 
     println("sending player position")
-    response = MinecraftProtocol.dump(
+    response = MinecraftProtocol.encodeToByteArray(
             PlayerPositionAndLook.serializer(),
             PlayerPositionAndLook(
                     0.0,
@@ -132,7 +132,7 @@ suspend fun main() {
     delay(1000)
 
     println("sending spawn living entity")
-    response = MinecraftProtocol.dump(
+    response = MinecraftProtocol.encodeToByteArray(
         SpawnLivingEntity.serializer(),
         SpawnLivingEntity(
             3,

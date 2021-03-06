@@ -7,58 +7,62 @@ import br.com.devsrsouza.ktmcpacket.internal.extractParameters
 import br.com.devsrsouza.ktmcpacket.internal.findEnumIndexByTag
 import io.ktor.utils.io.core.*
 import kotlinx.serialization.*
-import kotlinx.serialization.CompositeDecoder.Companion.READ_DONE
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.CompositeDecoder
+import kotlinx.serialization.encoding.CompositeDecoder.Companion.DECODE_DONE
+import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.internal.TaggedDecoder
 import kotlinx.serialization.internal.TaggedEncoder
-import kotlinx.serialization.modules.EmptyModule
-import kotlinx.serialization.modules.SerialModule
+import kotlinx.serialization.modules.EmptySerializersModule
+import kotlinx.serialization.modules.SerializersModule
 
 class MinecraftProtocol(
-    override val context: SerialModule = EmptyModule
+    override val serializersModule: SerializersModule = EmptySerializersModule
 ) : BinaryFormat {
 
     companion object Default : BinaryFormat by MinecraftProtocol()
 
     @InternalSerializationApi
-    override fun <T> dump(
+    override fun <T> encodeToByteArray(
             serializer: SerializationStrategy<T>,
             value: T
     ): ByteArray {
         val packetBuilder = BytePacketBuilder()
 
-        dump(packetBuilder, serializer, value)
+        encodeToByteArray(packetBuilder, serializer, value)
 
         return packetBuilder.build().readBytes()
     }
 
     @InternalSerializationApi
-    fun <T> dump(
+    fun <T> encodeToByteArray(
         output: Output,
         serializer: SerializationStrategy<T>,
         value: T
     ) {
         val encoder = MinecraftProtocolEncoder(output)
 
-        encoder.encode(serializer, value)
+        encoder.encodeSerializableValue(serializer, value)
     }
 
     @InternalSerializationApi
-    override fun <T> load(
+    override fun <T> decodeFromByteArray(
             deserializer: DeserializationStrategy<T>,
             bytes: ByteArray
     ): T {
         val packetRead = ByteReadPacket(bytes)
 
-        return load(deserializer, packetRead)
+        return decodeFromByteArray(deserializer, packetRead)
     }
 
     @InternalSerializationApi
-    fun <T> load(
+    fun <T> decodeFromByteArray(
         deserializer: DeserializationStrategy<T>,
         input: Input
     ): T {
         val decoder = MinecraftProtocolDecoder(input)
-        return decoder.decode(deserializer)
+        return decoder.decodeSerializableValue(deserializer)
     }
 
     @InternalSerializationApi
@@ -67,7 +71,7 @@ class MinecraftProtocol(
     ) : TaggedEncoder<ProtocolDesc>() {
 
         override fun shouldEncodeElementDefault(
-                descriptor: SerialDescriptor, index: Int
+            descriptor: SerialDescriptor, index: Int
         ): Boolean = true
 
         override fun SerialDescriptor.getTag(index: Int): ProtocolDesc {
@@ -140,15 +144,14 @@ class MinecraftProtocol(
         }
 
         override fun beginStructure(
-            descriptor: SerialDescriptor,
-            vararg typeSerializers: KSerializer<*>
+            descriptor: SerialDescriptor
         ): CompositeEncoder {
             return when(descriptor.kind) {
                 is PrimitiveKind -> RepeatedMinecraftProtocolEncoder(
                     output,
                     ProtocolDesc(MinecraftNumberType.DEFAULT, MINECRAFT_MAX_STRING_LENGTH)
                 )
-                else -> super.beginStructure(descriptor, *typeSerializers)
+                else -> super.beginStructure(descriptor)
             }
         }
     }
@@ -169,7 +172,7 @@ class MinecraftProtocol(
 
         override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
             return if(descriptor.elementsCount == currentIndex)
-                READ_DONE
+                DECODE_DONE
             else currentIndex++
         }
 
@@ -239,15 +242,14 @@ class MinecraftProtocol(
             extractParameters(this, index)
 
         override fun beginStructure(
-            descriptor: SerialDescriptor,
-            vararg typeParams: KSerializer<*>
+            descriptor: SerialDescriptor
         ): CompositeDecoder {
             return when(descriptor.kind) {
                 is PrimitiveKind -> RepeatedMinecraftProtocolDecoder(
                     input,
                     ProtocolDesc(MinecraftNumberType.DEFAULT, MINECRAFT_MAX_STRING_LENGTH)
                 )
-                else -> super.beginStructure(descriptor, *typeParams)
+                else -> super.beginStructure(descriptor)
             }
         }
     }

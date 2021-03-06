@@ -14,14 +14,14 @@ fun main() {
 
     println(packet)
 
-    val byteArray = MinecraftProtocol.dump(
+    val byteArray = MinecraftProtocol.encodeToByteArray(
         Handshake.serializer(),
         packet
     )
 
     println(byteArray.toHex())
 
-    val handshake = MinecraftProtocol.load(
+    val handshake = MinecraftProtocol.decodeFromByteArray(
         Handshake.serializer(),
         byteArray
     )
