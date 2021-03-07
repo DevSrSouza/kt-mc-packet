@@ -1,129 +1,79 @@
-import br.com.devsrsouza.ktmcpacket.MinecraftProtocol
+import br.com.devsrsouza.ktmcpacket.*
+import br.com.devsrsouza.ktmcpacket.PacketContent.*
 import br.com.devsrsouza.ktmcpacket.packets.client.Handshake
+import br.com.devsrsouza.ktmcpacket.packets.client.play.ClientKeepAlive
 import br.com.devsrsouza.ktmcpacket.packets.client.play.LoginStart
 import br.com.devsrsouza.ktmcpacket.packets.server.login.LoginSuccess
 import br.com.devsrsouza.ktmcpacket.packets.server.play.*
-import io.ktor.utils.io.core.BytePacketBuilder
-import io.ktor.utils.io.core.Output
-import io.ktor.utils.io.core.readBytes
-import io.ktor.utils.io.core.writeFully
-import io.ktor.utils.io.jvm.javaio.toByteReadChannel
-import io.ktor.utils.io.readFully
+import br.com.devsrsouza.ktmcpacket.utils.minecraft
+import io.ktor.network.selector.*
+import io.ktor.network.sockets.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import java.io.DataOutputStream
-import java.net.ServerSocket
 import java.util.*
-import kotlin.experimental.or
+import kotlin.system.measureTimeMillis
+import kotlin.time.ExperimentalTime
+import kotlin.time.seconds
 
 /**
  * This is a mini server socket as a Minecraft Server
  * that works only with Status request.
  */
+@OptIn(ExperimentalTime::class)
 suspend fun main() {
-    val serverSocket = ServerSocket(25565)
+    val serverSocket = aSocket(ActorSelectorManager(Dispatchers.IO))
+        .tcp()
+        .bind("127.0.0.1", 25565)
 
     println("started the ServerSocket")
 
-    val socket = serverSocket.accept()
-    val input = socket.getInputStream().toByteReadChannel()
-    val output = DataOutputStream(socket.getOutputStream())
+    val connection = serverSocket.accept()
+    val input = connection.openReadChannel()
+    val output = connection.openWriteChannel(autoFlush = false)
 
     println("Received a connection.")
 
     // handshake
     println("handshake start")
-    var packetLength = input.readVarInt()
-    println("packetLength: $packetLength")
-
-    var packetId = input.readVarInt()
-    println("packetId: $packetId")
-
-    // -1 because the packetId was read
-    var packetByteArray = ByteArray(packetLength - 1)
-    input.readFully(packetByteArray)
-
-    val handshake = MinecraftProtocol.decodeFromByteArray(
-            Handshake.serializer(),
-            packetByteArray
-    )
+    val handshake = input.minecraft.readClientPacket(PacketState.HANDSHAKE) as Found<Handshake>
     println(handshake)
 
-    // request
-    println("login start")
-    packetLength = input.readVarInt()
-    println("packetLength: $packetLength")
-
-    packetId = input.readVarInt()
-    println("packetId: $packetId")
-
-    packetByteArray = ByteArray(packetLength - 1)
-    input.readFully(packetByteArray)
-
-    val loginStart = MinecraftProtocol.decodeFromByteArray(
-            LoginStart.serializer(),
-            packetByteArray
-    )
-
+    val loginStart = input.minecraft.readClientPacket(PacketState.LOGIN) as Found<LoginStart>
     println(loginStart)
 
     println("sending Login success")
 
-    var response = MinecraftProtocol.encodeToByteArray(
-            LoginSuccess.serializer(),
-            LoginSuccess(UUID.randomUUID(), loginStart.nickname)
-    )
-
-    var packet = BytePacketBuilder().apply {
-        writeVarInt(0x02)
-        writeFully(response)
-    }
-
-    output.writeVarInt(packet.size)
-    output.write(packet.build().readBytes())
+    output.minecraft.writePacket(PacketState.LOGIN, LoginSuccess(UUID.randomUUID(), loginStart.packet.nickname))
 
     println("seding join game")
-    response = MinecraftProtocol.encodeToByteArray(
-            JoinGame.serializer(),
-            JoinGame(
-                    1,
-                    GameMode.ADVENTURE,
-                    Dimension.OVERWORLD,
-                    0.toLong(),
-                    10,
-                    LevelType.DEFAULT,
-                    32,
-                    false,
-                    false
-            )
+    output.minecraft.writePacket(
+        PacketState.PLAY,
+        JoinGame(
+            1,
+            GameMode.ADVENTURE,
+            Dimension.OVERWORLD,
+            0.toLong(),
+            10,
+            LevelType.DEFAULT,
+            32,
+            false,
+            false
+        )
     )
-
-    packet = BytePacketBuilder().apply {
-        writeVarInt(0x26)
-        writeFully(response)
-    }
-    output.writeVarInt(packet.size)
-    output.write(packet.build().readBytes())
 
     println("sending player position")
-    response = MinecraftProtocol.encodeToByteArray(
-            PlayerPositionAndLook.serializer(),
-            PlayerPositionAndLook(
-                    0.0,
-                    64.0,
-                    0.0,
-                    130f,
-                    25f,
-                    0x00,
-                    1
-            )
+    output.minecraft.writePacket(
+        PacketState.PLAY,
+        PlayerPositionAndLook(
+            0.0,
+            64.0,
+            0.0,
+            130f,
+            25f,
+            0x00,
+            1
+        )
     )
-
-    packet = BytePacketBuilder().apply {
-        writeByte(0x36)
-        writeFully(response)
-    }
-    output.writeVarInt(packet.size)
-    output.write(packet.build().readBytes())
 
     println("login complete!")
 
@@ -132,8 +82,8 @@ suspend fun main() {
     delay(1000)
 
     println("sending spawn living entity")
-    response = MinecraftProtocol.encodeToByteArray(
-        SpawnLivingEntity.serializer(),
+    output.minecraft.writePacket(
+        PacketState.PLAY,
         SpawnLivingEntity(
             3,
             UUID.randomUUID(),
@@ -150,25 +100,43 @@ suspend fun main() {
         )
     )
 
-    packet = BytePacketBuilder().apply {
-        writeByte(0x03)
-        writeFully(response)
-    }
-    output.writeVarInt(packet.size)
-    output.write(packet.build().readBytes())
+    val clientKeepAlivePacketType = PacketState.PLAY.byKClass[ClientKeepAlive::class]
+    requireNotNull(clientKeepAlivePacketType)
 
-    delay(60000)
-}
+    // send keep alive
+    while(true) {
+        delay(20.seconds)
 
-fun Output.writeVarInt(value: Int) {
-    var value = value
-    do {
-        var temp = (value and 127).toByte()
-        // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
-        value = value ushr 7
-        if (value != 0) {
-            temp = temp or 128.toByte()
+        println("Sending Keep Alive")
+        val keepAliveId = System.currentTimeMillis()
+
+        val timeTaken = measureTimeMillis {
+            output.minecraft.writePacket(
+                PacketState.PLAY,
+                ServerKeepAlive(keepAliveId)
+            )
+
+            var keepAlive: PacketContent.Found<ClientKeepAlive>? = null
+            while(keepAlive == null) {
+                println("reading new packet looking for KeepAlive")
+                val packet = input.minecraft.readClientPacket(PacketState.PLAY)
+                when(packet) {
+                    is Found -> {
+                        if(packet.type.id == clientKeepAlivePacketType.id) {
+                            keepAlive = packet as PacketContent.Found<ClientKeepAlive>
+                        } else {
+                            println("Received packet that is register but is not keepAlive\n$packet")
+                        }
+                    }
+                    is NotFound -> {
+                        val formattedId = String.format("0x%02X ", packet.id.toByte())
+                        println("Received packet with id=$formattedId that is not register by the library\n$packet")
+                    }
+                }
+            }
+            println("Received a keepAlive packet from client: $keepAlive")
         }
-        writeByte(temp)
-    } while (value != 0)
+
+        println("It took ${timeTaken}ms to the KeepAlive response.")
+    }
 }

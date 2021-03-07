@@ -1,10 +1,12 @@
 package br.com.devsrsouza.ktmcpacket
 
-import br.com.devsrsouza.ktmcpacket.internal.*
+import br.com.devsrsouza.ktmcpacket.exceptions.MinecraftProtocolDecodingException
 import br.com.devsrsouza.ktmcpacket.internal.extractEnumElementParameters
 import br.com.devsrsouza.ktmcpacket.internal.extractEnumParameters
 import br.com.devsrsouza.ktmcpacket.internal.extractParameters
 import br.com.devsrsouza.ktmcpacket.internal.findEnumIndexByTag
+import br.com.devsrsouza.ktmcpacket.utils.MinecraftStringEncoder.MINECRAFT_MAX_STRING_LENGTH
+import br.com.devsrsouza.ktmcpacket.utils.minecraft
 import io.ktor.utils.io.core.*
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind

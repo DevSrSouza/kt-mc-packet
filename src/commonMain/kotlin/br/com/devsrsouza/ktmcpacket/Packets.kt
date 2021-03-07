@@ -13,6 +13,8 @@ import br.com.devsrsouza.ktmcpacket.packets.server.status.Pong
 import br.com.devsrsouza.ktmcpacket.packets.server.status.ServerListPing
 import kotlinx.serialization.KSerializer
 import kotlin.reflect.KClass
+import br.com.devsrsouza.ktmcpacket.packets.client.play.ClientKeepAlive
+import br.com.devsrsouza.ktmcpacket.packets.server.play.ServerKeepAlive
 
 typealias PacketId = Int
 
@@ -45,7 +47,9 @@ enum class PacketState(
         )
     ),
     PLAY(
-        client = listOf(),
+        client = listOf(
+            PacketType(0x0F, ClientKeepAlive::class, ClientKeepAlive.serializer()),
+        ),
         server = listOf(
             PacketType(0x00, SpawnEntity::class, SpawnEntity.serializer()),
             PacketType(0x01, SpawnExperienceOrb::class, SpawnExperienceOrb.serializer()),
@@ -55,8 +59,9 @@ enum class PacketState(
             PacketType(0x06, EntityAnimation::class, EntityAnimation.serializer()),
             PacketType(0x08, AcknowledgePlayerDigging::class, AcknowledgePlayerDigging.serializer()),
             PacketType(0x09, BlockBreakAnimation::class, BlockBreakAnimation.serializer()),
+            PacketType(0x21, ServerKeepAlive::class, ServerKeepAlive.serializer()),
             PacketType(0x26, JoinGame::class, JoinGame.serializer()),
-            PacketType(0x36, PlayerPositionAndLook::class, PlayerPositionAndLook.serializer())
+            PacketType(0x36, PlayerPositionAndLook::class, PlayerPositionAndLook.serializer()),
         )
     );
 

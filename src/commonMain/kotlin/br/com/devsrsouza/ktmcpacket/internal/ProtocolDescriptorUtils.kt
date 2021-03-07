@@ -4,6 +4,7 @@ import  br.com.devsrsouza.ktmcpacket.*
 import br.com.devsrsouza.ktmcpacket.ProtocolDesc
 import br.com.devsrsouza.ktmcpacket.ProtocolEnumDesc
 import br.com.devsrsouza.ktmcpacket.ProtocolEnumElementDesc
+import br.com.devsrsouza.ktmcpacket.utils.MinecraftStringEncoder
 import kotlinx.serialization.descriptors.SerialDescriptor
 
 internal fun extractParameters(
@@ -13,7 +14,7 @@ internal fun extractParameters(
     val format = descriptor.findElementAnnotation<MinecraftNumber>(index)?.type
         ?: MinecraftNumberType.DEFAULT
     val stringMaxLength = descriptor.findElementAnnotation<MinecraftString>(index)?.maxLength
-        ?: MINECRAFT_MAX_STRING_LENGTH
+        ?: MinecraftStringEncoder.MINECRAFT_MAX_STRING_LENGTH
     return ProtocolDesc(format, stringMaxLength)
 }
 
@@ -23,7 +24,7 @@ internal fun extractEnumParameters(
     val format = descriptor.findEntityAnnotation<MinecraftEnum>()?.type
         ?: MinecraftEnumType.VARINT
     val stringMaxLength = descriptor.findEntityAnnotation<MinecraftString>()?.maxLength
-            ?: MINECRAFT_MAX_STRING_LENGTH
+            ?: MinecraftStringEncoder.MINECRAFT_MAX_STRING_LENGTH
     return ProtocolEnumDesc(format, stringMaxLength)
 }
 
