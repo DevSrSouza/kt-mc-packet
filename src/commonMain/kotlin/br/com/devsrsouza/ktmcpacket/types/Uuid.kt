@@ -3,18 +3,17 @@ package br.com.devsrsouza.ktmcpacket.types
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.encodeStructure
+import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.encoding.*
 
 @Serializer(forClass = Uuid::class)
-object UUIDSerializer : KSerializer<Uuid> {
+object UuidSerializer : KSerializer<Uuid> {
 
     override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("UUID", PrimitiveKind.LONG)
+        buildClassSerialDescriptor("com.benasher44.uuid.Uuid:Binary") {
+            element<Long>("msb")
+            element<Long>("lsb")
+        }
 
     override fun serialize(encoder: Encoder, value: Uuid) {
         encoder.encodeStructure(descriptor) {
@@ -23,26 +22,59 @@ object UUIDSerializer : KSerializer<Uuid> {
         }
     }
 
-    override fun deserialize(decoder: Decoder): Uuid {
-        val mostSignificationBits = decoder.decodeLong()
-        val leastSignificationBits = decoder.decodeLong()
+    override fun deserialize(decoder: Decoder): Uuid =
+        decoder.decodeStructure(descriptor) {
+            var mostSignificationBits: Long? = null
+            var leastSignificationBits: Long? = null
 
-        return Uuid(mostSignificationBits, leastSignificationBits)
-    }
+            if (decodeSequentially()) { // sequential decoding protocol
+                mostSignificationBits = decodeLongElement(descriptor, 0)
+                leastSignificationBits = decodeLongElement(descriptor, 1)
+            } else while (true) {
+                when (val index = decodeElementIndex(descriptor)) {
+                    0 -> mostSignificationBits = decodeLongElement(descriptor, 0)
+                    1 -> leastSignificationBits = decodeLongElement(descriptor, 1)
+                    CompositeDecoder.DECODE_DONE -> break
+                    else -> error("Unexpected index: $index")
+                }
+            }
+
+            requireNotNull(mostSignificationBits)
+            requireNotNull(leastSignificationBits)
+
+            Uuid(mostSignificationBits, leastSignificationBits)
+        }
 }
 
 @Serializer(forClass = Uuid::class)
-object UUIDStringSerializer : KSerializer<Uuid> {
+object UuidStringSerializer : KSerializer<Uuid> {
     override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
+        buildClassSerialDescriptor("com.benasher44.uuid.Uuid:String") {
+            element<String>("uuid")
+        }
 
     override fun serialize(encoder: Encoder, value: Uuid) {
-        encoder.encodeString(value.toString())
+        encoder.encodeStructure(descriptor) {
+            encodeStringElement(descriptor, 0, value.toString())
+        }
     }
 
-    override fun deserialize(decoder: Decoder): Uuid {
-        val uuidString = decoder.decodeString()
+    override fun deserialize(decoder: Decoder): Uuid =
+        decoder.decodeStructure(descriptor) {
+            var uuid: String? = null
 
-        return uuidFrom(uuidString)
-    }
+            if (decodeSequentially()) { // sequential decoding protocol
+                uuid = decodeStringElement(UuidSerializer.descriptor, 0)
+            } else while (true) {
+                when (val index = decodeElementIndex(UuidSerializer.descriptor)) {
+                    0 -> uuid = decodeStringElement(UuidSerializer.descriptor, 0)
+                    CompositeDecoder.DECODE_DONE -> break
+                    else -> error("Unexpected index: $index")
+                }
+            }
+
+            requireNotNull(uuid)
+
+            uuidFrom(uuid)
+        }
 }

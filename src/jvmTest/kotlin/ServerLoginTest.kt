@@ -5,6 +5,7 @@ import br.com.devsrsouza.ktmcpacket.packets.client.play.ClientKeepAlive
 import br.com.devsrsouza.ktmcpacket.packets.client.play.LoginStart
 import br.com.devsrsouza.ktmcpacket.packets.server.login.LoginSuccess
 import br.com.devsrsouza.ktmcpacket.packets.server.play.*
+import br.com.devsrsouza.ktmcpacket.types.Location
 import br.com.devsrsouza.ktmcpacket.utils.minecraft
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
@@ -88,12 +89,15 @@ suspend fun main() {
             3,
             UUID.randomUUID(),
             14,
-            -1.5,
-            64.0,
-            -1.5,
+            Location(
+                -1.5,
+                64.0,
+                -1.5,
+                0u.toByte(),
+                0u.toByte(),
+            ),
             0u.toByte(),
-            0u.toByte(),
-            0u.toByte(),
+
             0,
             0,
             0

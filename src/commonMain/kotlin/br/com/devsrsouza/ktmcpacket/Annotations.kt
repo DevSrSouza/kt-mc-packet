@@ -9,7 +9,7 @@ enum class MinecraftNumberType {
 @SerialInfo
 @Target(AnnotationTarget.PROPERTY)
 annotation class MinecraftNumber(
-        val type: MinecraftNumberType = MinecraftNumberType.DEFAULT
+    val type: MinecraftNumberType = MinecraftNumberType.DEFAULT
 )
 
 // Supports String properties and Enum String type
@@ -29,8 +29,17 @@ annotation class MinecraftEnum(
     val type: MinecraftEnumType = MinecraftEnumType.VARINT
 )
 
+enum class MinecraftArraySizeType {
+    READ_AVAILABLE, // this will read the rest of the bytes
+    VARINT
+}
+
+annotation class MinecraftArray(
+    val sizeType: MinecraftArraySizeType = MinecraftArraySizeType.VARINT
+)
+
 @SerialInfo
 @Target(AnnotationTarget.PROPERTY)
 annotation class SerialOrdinal(
-        val ordinal: Int
+    val ordinal: Int
 )

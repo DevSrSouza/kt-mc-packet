@@ -15,25 +15,22 @@ kotlin {
     jvm()
     js()
 
-    val serialization_version = "1.1.0"
-    val ktor_version = "1.5.2"
-    val benasher_uuid_version = "0.2.3"
 
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serialization_version")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:$serialization_version")
-                implementation("io.ktor:ktor-io:$ktor_version")
-                implementation("com.benasher44:uuid:$benasher_uuid_version")
+                implementation(Dependencies.ktxSerializationCore)
+                implementation(Dependencies.ktxSerializationProtoBuf)
+                implementation(Dependencies.ktorIO)
+                implementation(Dependencies.benasher44Uuid)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                implementation("io.ktor:ktor-network:$ktor_version")
+                implementation(Dependencies.ktorNetwork)
             }
         }
 

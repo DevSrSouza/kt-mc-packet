@@ -1,9 +1,6 @@
-package br.com.devsrsouza.ktmcpacket.internal
+package br.com.devsrsouza.ktmcpacket.serialization
 
 import  br.com.devsrsouza.ktmcpacket.*
-import br.com.devsrsouza.ktmcpacket.ProtocolDesc
-import br.com.devsrsouza.ktmcpacket.ProtocolEnumDesc
-import br.com.devsrsouza.ktmcpacket.ProtocolEnumElementDesc
 import br.com.devsrsouza.ktmcpacket.utils.MinecraftStringEncoder
 import kotlinx.serialization.descriptors.SerialDescriptor
 
